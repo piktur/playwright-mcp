@@ -40,10 +40,11 @@ program
     .option('--vision', 'Run server that uses screenshots (Aria snapshots are used by default)')
     .option('--port <port>', 'Port to listen on for SSE transport.')
     .option('--cdp-endpoint <endpoint>', 'CDP endpoint to connect to.')
+    .option('--remote-endpoint <endpoint>', 'Remote endpoint to connect to.')
     .action(async options => {
       const launchOptions: LaunchOptions = {
         headless: !!options.headless,
-        channel: 'chrome',
+        // channel: 'chrome',
       };
       const userDataDir = options.userDataDir ?? await createUserDataDir();
       const serverList = new ServerList(() => createServer({
@@ -51,6 +52,7 @@ program
         launchOptions,
         vision: !!options.vision,
         cdpEndpoint: options.cdpEndpoint,
+        remoteEndpoint: options.remoteEndpoint
       }));
       setupExitWatchdog(serverList);
 

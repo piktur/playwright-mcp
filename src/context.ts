@@ -130,8 +130,10 @@ export class Context {
     this._lastSnapshotFrames = visibleFrames.map(frame => frame.contentFrame());
 
     const snapshots = await Promise.all([
+      // @ts-expect-error
       page.locator('html').ariaSnapshot({ ref: true }),
       ...this._lastSnapshotFrames.map(async (frame, index) => {
+        // @ts-expect-error
         const snapshot = await frame.locator('html').ariaSnapshot({ ref: true });
         const args = [];
         const src = await frame.owner().getAttribute('src');
