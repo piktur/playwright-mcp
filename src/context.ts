@@ -17,8 +17,8 @@
 import * as playwright from 'playwright';
 import yaml from 'yaml';
 
-import { waitForCompletion } from './tools/utils';
 import { ToolResult } from './tools/tool';
+import { waitForCompletion } from './tools/utils';
 
 export type ContextOptions = {
   browserName?: 'chromium' | 'firefox' | 'webkit';
@@ -308,6 +308,7 @@ class PageSnapshot {
 
   private async _snapshotFrame(frame: playwright.Page | playwright.FrameLocator) {
     const frameIndex = this._frameLocators.push(frame) - 1;
+    // @ts-expect-error
     const snapshotString = await frame.locator('body').ariaSnapshot({ ref: true });
     const snapshot = yaml.parseDocument(snapshotString);
 
