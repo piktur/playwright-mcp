@@ -14,21 +14,21 @@
  * limitations under the License.
  */
 
-import http from 'http';
 import fs from 'fs';
+import http from 'http';
 import os from 'os';
 import path from 'path';
 
-import { program } from 'commander';
-import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { SSEServerTransport } from '@modelcontextprotocol/sdk/server/sse.js';
+import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+import { program } from 'commander';
 
 
 import { createServer } from './index';
 import { ServerList } from './server';
 
-import type { LaunchOptions } from 'playwright';
 import assert from 'assert';
+import type { LaunchOptions } from 'playwright';
 import { ToolCapability } from './tools/tool';
 
 const packageJSON = require('../package.json');
@@ -38,12 +38,13 @@ program
     .name(packageJSON.name)
     .option('--browser <browser>', 'Browser or chrome channel to use, possible values: chrome, firefox, webkit, msedge.')
     .option('--caps <caps>', 'Comma-separated list of capabilities to enable, possible values: tabs, pdf, history, wait, files, install. Default is all.')
-    .option('--cdp-endpoint <endpoint>', 'CDP endpoint to connect to.')
     .option('--executable-path <path>', 'Path to the browser executable.')
     .option('--headless', 'Run browser in headless mode, headed by default')
-    .option('--port <port>', 'Port to listen on for SSE transport.')
     .option('--user-data-dir <path>', 'Path to the user data directory')
     .option('--vision', 'Run server that uses screenshots (Aria snapshots are used by default)')
+    .option('--port <port>', 'Port to listen on for SSE transport.')
+    .option('--cdp-endpoint <endpoint>', 'CDP endpoint to connect to.')
+    .option('--remote-endpoint <endpoint>', 'Remote endpoint to connect to.')
     .action(async options => {
       let browserName: 'chromium' | 'firefox' | 'webkit';
       let channel: string | undefined;
@@ -70,7 +71,7 @@ program
           break;
         default:
           browserName = 'chromium';
-          channel = 'chrome';
+          channel = 'chromium';
       }
 
       const launchOptions: LaunchOptions = {
@@ -88,6 +89,7 @@ program
         vision: !!options.vision,
         cdpEndpoint: options.cdpEndpoint,
         capabilities: options.caps?.split(',').map((c: string) => c.trim() as ToolCapability),
+        remoteEndpoint: options.remoteEndpoint
       }));
       setupExitWatchdog(serverList);
 
@@ -95,7 +97,9 @@ program
         startSSEServer(+options.port, serverList);
       } else {
         const server = await serverList.create();
-        await server.connect(new StdioServerTransport());
+        const transport = new StdioServerTransport();
+        await server.connect(transport);
+        console.error(`MCP Server (mcp/playwright) running on stdio`);
       }
     });
 

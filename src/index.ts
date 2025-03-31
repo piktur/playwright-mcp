@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { console as consoleResource } from './resources/console';
 import { createServerWithTools } from './server';
 import common from './tools/common';
 import files from './tools/files';
@@ -21,15 +22,14 @@ import install from './tools/install';
 import keyboard from './tools/keyboard';
 import navigate from './tools/navigate';
 import pdf from './tools/pdf';
+import screen from './tools/screen';
 import snapshot from './tools/snapshot';
 import tabs from './tools/tabs';
-import screen from './tools/screen';
-import { console as consoleResource } from './resources/console';
 
-import type { Tool, ToolCapability } from './tools/tool';
-import type { Resource } from './resources/resource';
-import type { Server } from '@modelcontextprotocol/sdk/server/index.js';
+import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { LaunchOptions } from 'playwright';
+import type { Resource } from './resources/resource';
+import type { Tool, ToolCapability } from './tools/tool';
 
 const snapshotTools: Tool[] = [
   ...common,
@@ -64,11 +64,12 @@ type Options = {
   cdpEndpoint?: string;
   vision?: boolean;
   capabilities?: ToolCapability[];
+  remoteEndpoint?: string;
 };
 
 const packageJSON = require('../package.json');
 
-export function createServer(options?: Options): Server {
+export function createServer(options?: Options): McpServer {
   const allTools = options?.vision ? screenshotTools : snapshotTools;
   const tools = allTools.filter(tool => !options?.capabilities || tool.capability === 'core' || options.capabilities.includes(tool.capability));
   return createServerWithTools({
@@ -80,5 +81,6 @@ export function createServer(options?: Options): Server {
     userDataDir: options?.userDataDir ?? '',
     launchOptions: options?.launchOptions,
     cdpEndpoint: options?.cdpEndpoint,
+    remoteEndpoint: options?.remoteEndpoint,
   });
 }
